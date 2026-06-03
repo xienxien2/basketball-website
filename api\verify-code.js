@@ -14,33 +14,56 @@ function codeHash(email, code, secret) {
   return crypto.createHash("sha256").update(`${email}:${code}:${secret}`).digest("hex");
 }
 
+function readBody(req) {
+  if (req.body && typeof req.body === "object") return Promise.resolve(req.body);
+  if (typeof req.body === "string") return Promise.resolve(JSON.parse(req.body || "{}"));
+  return new Promise((resolve, reject) => {
+    let raw = "";
+    req.on("data", chunk => { raw += chunk; });
+    req.on("end", () => {
+      try {
+        resolve(raw ? JSON.parse(raw) : {});
+      } catch (error) {
+        reject(new Error("Invalid request JSON"));
+      }
+    });
+    req.on("error", reject);
+  });
+}
+
+function safeEqual(a, b) {
+  const left = Buffer.from(String(a || ""));
+  const right = Buffer.from(String(b || ""));
+  return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") return json(res, 405, { error: "Method not allowed" });
 
   try {
-    const { email, code, challenge } = req.body || {};
+    const { email, code, challenge } = await readBody(req);
     const normalizedEmail = String(email || "").trim().toLowerCase();
     const secret = process.env.AUTH_CODE_SECRET;
     if (!secret) return json(res, 500, { error: "AUTH_CODE_SECRET is not configured" });
-    if (!challenge || !challenge.includes(".")) return json(res, 400, { error: "请先发送验证码" });
+    if (!challenge || !challenge.includes(".")) return json(res, 400, { error: "Please send a verification code first" });
 
     const [payload, signature] = challenge.split(".");
     const expectedSignature = sign(payload, secret);
-    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
-      return json(res, 400, { error: "验证码凭证无效" });
+    if (!safeEqual(signature, expectedSignature)) {
+      return json(res, 400, { error: "Invalid verification challenge" });
     }
 
     const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    if (Date.now() > data.expires) return json(res, 400, { error: "验证码已过期，请重新发送" });
-    if (data.email !== normalizedEmail) return json(res, 400, { error: "邮箱和验证码不匹配" });
+    if (Date.now() > data.expires) return json(res, 400, { error: "Verification code expired, please send a new one" });
+    if (data.email !== normalizedEmail) return json(res, 400, { error: "Email does not match verification challenge" });
 
     const enteredHash = codeHash(normalizedEmail, String(code || ""), secret);
-    if (!crypto.timingSafeEqual(Buffer.from(data.codeHash), Buffer.from(enteredHash))) {
-      return json(res, 400, { error: "验证码错误" });
+    if (!safeEqual(data.codeHash, enteredHash)) {
+      return json(res, 400, { error: "Incorrect verification code" });
     }
 
     json(res, 200, { ok: true });
   } catch (error) {
-    json(res, 500, { error: error.message || "验证失败" });
+    json(res, 500, { error: error.message || "Verification failed" });
   }
 };
