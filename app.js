@@ -4,7 +4,19 @@ var AID = "basket-admin";
 var route = "home";
 var tab = "videos";
 
+function bundledSeed() {
+  if (!window.BASKETBALL_SITE_DATA) return null;
+  return JSON.parse(JSON.stringify(window.BASKETBALL_SITE_DATA));
+}
+
+function bundledVersion() {
+  return window.BASKETBALL_SITE_DATA && window.BASKETBALL_SITE_DATA.dataVersion;
+}
+
 function seed() {
+  var bundled = bundledSeed();
+  if (bundled) return ensureArchives(bundled);
+
   return {
     cats: [
       { id: "c1", name: "运球", desc: "控球节奏与突破基本功" },
@@ -27,7 +39,13 @@ function seed() {
 }
 
 function db() {
-  return JSON.parse(localStorage.getItem(KEY) || "null") || seed();
+  var stored = JSON.parse(localStorage.getItem(KEY) || "null");
+  var version = bundledVersion();
+  if (version && (!stored || stored.dataVersion !== version)) {
+    stored = seed();
+    save(stored);
+  }
+  return stored || seed();
 }
 
 function save(x) {

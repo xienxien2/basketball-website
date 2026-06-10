@@ -2,7 +2,19 @@ const LEAD_WECHAT_ID = "zgz20040401";
 const LEAD_WECHAT_QR = "assets/wechat-qr.jpg";
 const COURSE_KEY = "basketball-library-v1";
 
+function courseBundledSeed() {
+  if (!window.BASKETBALL_SITE_DATA) return null;
+  return JSON.parse(JSON.stringify(window.BASKETBALL_SITE_DATA));
+}
+
+function courseBundledVersion() {
+  return window.BASKETBALL_SITE_DATA && window.BASKETBALL_SITE_DATA.dataVersion;
+}
+
 function courseSeed() {
+  var bundled = courseBundledSeed();
+  if (bundled) return bundled;
+
   return {
     cats: [
       { id: "c1", name: "运球", desc: "控球节奏与突破基本功" },
@@ -16,7 +28,13 @@ function courseSeed() {
 }
 
 function db() {
-  return JSON.parse(localStorage.getItem(COURSE_KEY) || "null") || courseSeed();
+  var stored = JSON.parse(localStorage.getItem(COURSE_KEY) || "null");
+  var version = courseBundledVersion();
+  if (version && (!stored || stored.dataVersion !== version)) {
+    stored = courseSeed();
+    save(stored);
+  }
+  return stored || courseSeed();
 }
 
 function save(x) {
