@@ -1,1 +1,51 @@
-﻿<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>篮球训练库 | 专业篮球教学视频</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="storefront.css"></head><body><div class="topline"><div class="box">专业篮球教学资源平台 <span>每周更新 · 手机电脑随时学</span></div></div><header><div class="box mast"><button class="logo" onclick="go('home')"><i>篮</i><b>篮球训练库</b><em>专业篮球教学视频库</em></button><form class="searchbar" onsubmit="quickSearch(event)"><input id="site-search" placeholder="搜索投篮、运球、防守、战术课程"><button>搜索</button></form><div class="mast-actions"><button id="adminBtn" class="plain" onclick="adminEntry()">管理后台</button><button id="account" class="btn small" onclick="account()">登录 / 注册</button></div></div><nav class="mainnav"><div class="box"><button onclick="go('home')">首页</button><button onclick="go('courses')">篮球课程</button><button onclick="choose('c2')">投篮训练</button><button onclick="choose('c1')">控球突破</button><button onclick="choose('c3')">防守训练</button><button onclick="go('membership')">会员专区</button></div></nav></header><main id="app"></main><div class="mobile"><button onclick="go('home')">首页</button><button onclick="go('courses')">课程</button><button onclick="go('membership')">会员</button><button onclick="go('profile')">我的</button></div><div id="pop"></div><script src="app.js"></script><script src="storefront.js"></script></body></html>
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>篮球训练库 | 篮球教学片段与微信咨询</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="storefront.css">
+    <link rel="stylesheet" href="lead.css">
+  </head>
+  <body>
+    <div class="topline">
+      <div class="box">篮球训练库 · 每月更新教学片段 <span>完整内容请加微信咨询</span></div>
+    </div>
+    <header>
+      <div class="box mast">
+        <button class="logo" onclick="goLeadHome()">
+          <i>篮</i><b>篮球训练库</b><em>篮球教学片段和训练资料</em>
+        </button>
+        <form class="searchbar" onsubmit="quickSearch(event)">
+          <input id="site-search" placeholder="搜索投篮、运球、防守、战术片段">
+          <button>搜索</button>
+        </form>
+        <div class="mast-actions">
+          <button class="btn small lead-cta" onclick="showWechat()">加微信咨询</button>
+        </div>
+      </div>
+      <nav class="mainnav">
+        <div class="box">
+          <button onclick="goLeadHome()">首页</button>
+          <button onclick="scrollToSection('clips')">视频片段</button>
+          <button onclick="scrollToSection('monthly')">每月更新</button>
+          <span id="category-nav" class="category-nav"></span>
+          <button onclick="showWechat()">加微信</button>
+        </div>
+      </nav>
+    </header>
+    <div id="fixed-archive" class="fixed-archive"></div>
+    <main id="app"></main>
+    <div class="mobile lead-mobile">
+      <button onclick="goLeadHome()">首页</button>
+      <button onclick="scrollToSection('clips')">片段</button>
+      <button onclick="scrollToSection('monthly')">月份</button>
+      <button onclick="showWechat()">加微信</button>
+    </div>
+    <button class="floating-wechat" onclick="showWechat()">加微信咨询</button>
+    <div id="pop"></div>
+    <script src="app.js"></script>
+    <script src="lead.js"></script>
+  </body>
+</html>
